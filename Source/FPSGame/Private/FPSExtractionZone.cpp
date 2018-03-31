@@ -21,7 +21,7 @@ AFPSExtractionZone::AFPSExtractionZone()
 	OverlapComp->SetBoxExtent(FVector(200.0f));
 	RootComponent = OverlapComp;
 
-	OverlapComp->SetHiddenInGame(false);
+	OverlapComp->SetHiddenInGame(true);
 
 	OverlapComp->OnComponentBeginOverlap.AddDynamic(this, &AFPSExtractionZone::HandleOverlap);
 
