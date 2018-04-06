@@ -23,7 +23,7 @@ AFPSAIGuard::AFPSAIGuard()
 void AFPSAIGuard::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	OriginalRotation = GetActorRotation();
 }
 
 void AFPSAIGuard::OnPawnSeen(APawn * SeenPawn)
@@ -40,7 +40,33 @@ void AFPSAIGuard::OnPawnSeen(APawn * SeenPawn)
 void AFPSAIGuard::OnNoiseHeard(APawn* HeardPawn, const FVector& Location, float Volume)
 {
 	DrawDebugSphere(GetWorld(), Location, 32.0f, 12, FColor::Green, false, 10.0f);
+
+	// Make the guard look at where projectile dropped
+		// Calculate direction, make vector
+	FVector Direction = Location - GetActorLocation();
+	Direction.Normalize();
+
+		// Exclude Yaw from calculations so the guard wouldn't be rotating in Z Axis
+	FRotator NewLookAt = FRotationMatrix::MakeFromX(Direction).Rotator();
+	NewLookAt.Pitch = 0.0f;
+	NewLookAt.Roll = 0.0f;
+
+	// Finish off by setting the rotation of the guard actor
+
+	SetActorRotation(NewLookAt);
 	UE_LOG(LogTemp, Warning, TEXT("Pawn was heard !"));
+
+	// Clear timer handle - invalidate
+	GetWorldTimerManager().ClearTimer(TimerHandle_ResetOrientation);
+
+	// Create and start new timer
+	GetWorldTimerManager().SetTimer(TimerHandle_ResetOrientation, this, &AFPSAIGuard::ResetOrientation, 3.0f);
+	
+}
+
+void AFPSAIGuard::ResetOrientation()
+{
+	SetActorRotation(OriginalRotation);
 }
 
 // Called every frame
