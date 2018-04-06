@@ -34,11 +34,13 @@ void AFPSAIGuard::OnPawnSeen(APawn * SeenPawn)
 	}
 
 	DrawDebugSphere(GetWorld(), SeenPawn->GetActorLocation(), 32.0f, 12, FColor::Red, false, 10.0f);
+	UE_LOG(LogTemp, Warning, TEXT("Pawn was seen !"));
 }
 
 void AFPSAIGuard::OnNoiseHeard(APawn* HeardPawn, const FVector& Location, float Volume)
 {
 	DrawDebugSphere(GetWorld(), Location, 32.0f, 12, FColor::Green, false, 10.0f);
+	UE_LOG(LogTemp, Warning, TEXT("Pawn was heard !"));
 }
 
 // Called every frame

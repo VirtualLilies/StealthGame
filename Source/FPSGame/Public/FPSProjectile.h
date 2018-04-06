@@ -10,7 +10,6 @@
 class UProjectileMovementComponent;
 class USphereComponent;
 
-
 UCLASS()
 class AFPSProjectile : public AActor
 {
