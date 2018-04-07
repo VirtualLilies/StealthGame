@@ -56,6 +56,27 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "AI")
 	void OnStateChanged(EAIState NewState);
 
+	// CHALLENGE CODE
+
+	/* Let the guard go on patrol */
+	UPROPERTY(EditInstanceOnly, Category = "AI")
+	bool bPatrol;
+
+	/* First of two patrol points to patrol between */
+	// What meta does is simply stating that if bPatrol is true then a variable is editable, if bPatrol was false, then the variable would be grayed out in the instance of the actor
+	UPROPERTY(EditInstanceOnly, Category = "AI", meta = (EditCondition = "bPatrol"))
+	AActor* FirstPatrolPoint;
+
+	/* Second of two patrol points to patrol between */
+	UPROPERTY(EditInstanceOnly, Category = "AI", meta = (EditCondition = "bPatrol"))
+	AActor* SecondPatrolPoint;
+
+	// The current point the actor is either moving to or standing at
+	AActor* CurrentPatrolPoint;
+
+	void MoveToNextPatrolPoint();
+
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

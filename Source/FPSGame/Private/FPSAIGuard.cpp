@@ -4,6 +4,9 @@
 #include "Perception/PawnSensingComponent.h"
 #include "DrawDebugHelpers.h"
 #include "FPSGameMode.h"
+#include "Kismet/GameplayStatics.h"
+#include "Math/UnrealMathUtility.h"
+#include "AI/Navigation/NavigationSystem.h"
 
 
 // Sets default values
@@ -27,6 +30,11 @@ void AFPSAIGuard::BeginPlay()
 {
 	Super::BeginPlay();
 	OriginalRotation = GetActorRotation();
+
+	if (bPatrol)
+	{
+		MoveToNextPatrolPoint();
+	}
 }
 
 void AFPSAIGuard::OnPawnSeen(APawn * SeenPawn)
@@ -46,6 +54,13 @@ void AFPSAIGuard::OnPawnSeen(APawn * SeenPawn)
 	}
 
 	SetGuardState(EAIState::Alerted);
+
+	// Stop movement if Patrolling
+	AController* Controller = GetController();
+	if (Controller)
+	{
+		Controller->StopMovement();
+	}
 }
 
 void AFPSAIGuard::OnNoiseHeard(APawn* HeardPawn, const FVector& Location, float Volume)
@@ -79,6 +94,13 @@ void AFPSAIGuard::OnNoiseHeard(APawn* HeardPawn, const FVector& Location, float 
 	GetWorldTimerManager().SetTimer(TimerHandle_ResetOrientation, this, &AFPSAIGuard::ResetOrientation, 3.0f);
 
 	SetGuardState(EAIState::Suspicious);
+
+	// Stop movement if Patrolling
+	AController* Controller = GetController();
+	if (Controller)
+	{
+		Controller->StopMovement();
+	}
 }
 
 void AFPSAIGuard::ResetOrientation()
@@ -91,6 +113,12 @@ void AFPSAIGuard::ResetOrientation()
 	}
 
 	SetGuardState(EAIState::Idle);
+
+	// Stopped investigating... if we are a patrolling pawn, pick a new patrol point to move to
+	if (bPatrol)
+	{
+		MoveToNextPatrolPoint();
+	}
 }
 
 void AFPSAIGuard::SetGuardState(EAIState NewState)
@@ -105,10 +133,41 @@ void AFPSAIGuard::SetGuardState(EAIState NewState)
 	OnStateChanged(GuardState);
 }
 
+
+void AFPSAIGuard::MoveToNextPatrolPoint()
+{
+	// Assign next patrol point
+	if (CurrentPatrolPoint == nullptr || CurrentPatrolPoint == SecondPatrolPoint)
+	{
+		CurrentPatrolPoint = FirstPatrolPoint;
+	}
+	else
+	{
+		CurrentPatrolPoint = SecondPatrolPoint;
+	}
+
+	UNavigationSystem::SimpleMoveToActor(GetController(), CurrentPatrolPoint);
+}
+
 // Called every frame
 void AFPSAIGuard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// Patrol goal checks
+		// We check if we have a patrol point
+	if (CurrentPatrolPoint)
+	{
+		// Calculate the distance to goal
+		FVector Delta = GetActorLocation() - CurrentPatrolPoint->GetActorLocation();
+		float DistanceToGoal = Delta.Size();
+
+			// Check if we are within 50 units of our gal, if so - pick a new patrol point
+			if (DistanceToGoal < 50)
+			{
+				MoveToNextPatrolPoint();
+			}
+	}
 
 }
 
