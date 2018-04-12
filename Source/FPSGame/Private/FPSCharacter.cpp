@@ -59,7 +59,7 @@ void AFPSCharacter::Tick(float DeltaTime)
 	if (!IsLocallyControlled())
 	{
 		FRotator NewRot = CameraComponent->RelativeRotation;
-		NewRot.Pitch = RemoteViewPitch * 360.0f / 255.0f; // Bare in mind RemoveViewPitch is compressed to 1 byte, so can't have negative value. We need to convert it back.
+		NewRot.Pitch = RemoteViewPitch * 360.0f / 255.0f; // Bare in mind RemoteViewPitch is compressed to 1 byte, so can't have negative value. We need to convert it back.
 
 		CameraComponent->SetRelativeRotation(NewRot);
 	}
