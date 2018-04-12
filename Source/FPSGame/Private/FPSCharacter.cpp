@@ -51,6 +51,21 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	
 }
 
+void AFPSCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Check if it's NOT locally controlled
+	if (!IsLocallyControlled())
+	{
+		FRotator NewRot = CameraComponent->RelativeRotation;
+		NewRot.Pitch = RemoteViewPitch * 360.0f / 255.0f; // Bare in mind RemoveViewPitch is compressed to 1 byte, so can't have negative value. We need to convert it back.
+
+		CameraComponent->SetRelativeRotation(NewRot);
+	}
+
+}
+
 
 void AFPSCharacter::Fire()
 {
